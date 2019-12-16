@@ -8,6 +8,6 @@ This is a simple application written in Node.js without using any frameworks to 
 
 ## Usage
 1. Download the `index.js` file and place it in its own folder such as `minimal-dynamic-http-server/`
-2. Import the server in your code 
+2. Import the server in your code\n
     `const server = require('./minimal-dynamic-http-server');`
 
