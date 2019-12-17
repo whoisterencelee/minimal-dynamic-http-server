@@ -92,7 +92,7 @@ const server = require('./index');
 // Should successfully server dynamic content
 (function() {
   try {
-    let _data, _statusCode;
+    let _data, _statusCode, _responseData;
     let response = {
       end: data => {
         _data = data;
@@ -104,10 +104,16 @@ const server = require('./index');
 
     let request = {
       method: 'GET',
-      url: '/api/employees',
+      url: '/api/employees?id=1',
+      on: (event, callback) => {
+        if (event !== 'error') {
+          callback(Buffer.from('{"foo":"bar"}'));
+        }
+      },
     };
     server.setAllowedPaths({
-      '/api/employees': callback => {
+      '/api/employees': (responseData, callback) => {
+        _responseData = responseData;
         callback(200, { name: 'John Smith' });
       },
     });
@@ -118,6 +124,11 @@ const server = require('./index');
       assert.strictEqual(_statusCode, 200);
       assert.ok(_data instanceof Object);
       assert.deepStrictEqual(_data, { name: 'John Smith' });
+      assert.strictEqual(_responseData.method, 'get');
+      assert.strictEqual(_responseData.pathname, '/api/employees');
+      assert.strictEqual(typeof _responseData.query, 'object');
+      assert.strictEqual(_responseData.query['id'], '1');
+      assert.deepStrictEqual(JSON.parse(_responseData.buffer), { foo: 'bar' });
     }, 100);
   } catch (error) {
     console.log(error);

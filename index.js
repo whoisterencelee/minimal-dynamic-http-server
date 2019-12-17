@@ -1,5 +1,5 @@
 /**
- * Minimal HTTP Server
+ * Minimal Dynamic HTTP Server
  * @author Amit Gupta
  * @description Minimal HTTP server written in Node.js to serve static and dynamic content.
  * 1. Place this code in folder such as 'minimal-http-server'
@@ -11,11 +11,12 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const url = require('url');
 
 // Container Object
 const server = {};
 
-// Base directory - Assuming minimal-http-server will be accessed from its own folder
+// Base directory - Assuming minimal-dynamic-http-server will be accessed from its own folder
 const baseDir = path.join(__dirname, '../');
 
 /**
@@ -115,28 +116,60 @@ server.getAllowedDynamicPath = path => {
  * Serve the dynamic content
  * @param {string} pathname - dynamic path
  * @param {Object} response - response object expected by the http.createServer callback
- * @todo Enhance this to handle different method types - get, post, etc. and query object
+ *
  */
 server.serveDynamicContent = (request, response) => {
-  const { method, url } = request;
-  if (method.toLowerCase() === 'get') {
-    // retrieve the handler
-    const handler = allowedPaths[url];
-    handler((statusCode = 200, data = {}) => {
+  // Retrieve the HTTP method
+  const method = request.method.toLowerCase();
+  // Parse the incoming request url
+  const parsedUrl = url.parse(request.url, true);
+  // Retrieve the pathname and query object from the parsed url
+  const { pathname, query } = parsedUrl;
+
+  // buffer holds the request body that might come with a POST or PUT request.
+  let buffer = [];
+
+  request.on('error', error => {
+    console.log('Error Occurred', error);
+    response.writeHead(500);
+    response.end('Error occurred while processing HTTP request', error);
+  });
+
+  request.on('data', chunk => {
+    buffer.push(chunk);
+  });
+
+  request.on('end', () => {
+    buffer = Buffer.concat(buffer);
+
+    // Prepare the request data object to pass to the handler function
+    const responseData = {
+      method,
+      pathname,
+      query,
+      buffer,
+    };
+
+    // Retrieve the handler for the path
+    const handler = allowedPaths[pathname];
+    /**
+     * Call the handler for the path
+     * @param {Object} responseData
+     * @param {function} callback function definition
+     *
+     */
+    handler(responseData, (statusCode = 200, data = {}) => {
       response.writeHead(statusCode);
       response.end(data);
     });
-  } else {
-    response.writeHead(405);
-    response.end('Only GET HTTP request is allowed');
-  }
+  });
 };
 /**
  * CREATE SERVER INSTANCE
  *
  */
 const httpServer = http.createServer((request, response) => {
-  const pathname = request.url;
+  const pathname = url.parse(request.url, false).pathname;
   const dynamicPath = server.getAllowedDynamicPath(pathname);
 
   if (dynamicPath) {
