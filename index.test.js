@@ -77,7 +77,9 @@ const server = require('./index');
 (function() {
   try {
     server.setAllowedPaths({
+      '/api/abc': null,
       '/api/employees': null,
+      '/api/blabla': null,
     });
     let dynamicPath = server.getAllowedDynamicPath('/api/employees');
     assert.strictEqual(dynamicPath, '/api/employees');

@@ -103,13 +103,14 @@ let allowedPaths = {};
  * @param {string} path
  */
 server.getAllowedDynamicPath = path => {
-  let dynamicPath;
   for (const key in allowedPaths) {
     if (allowedPaths.hasOwnProperty(key)) {
-      dynamicPath = path === key ? path : false;
+      if (path === key) {
+        return path;
+      }
     }
   }
-  return dynamicPath;
+  return false;
 };
 
 /**
@@ -171,7 +172,6 @@ server.serveDynamicContent = (request, response) => {
 const httpServer = http.createServer((request, response) => {
   const pathname = url.parse(request.url, false).pathname;
   const dynamicPath = server.getAllowedDynamicPath(pathname);
-
   if (dynamicPath) {
     server.serveDynamicContent(request, response);
   } else {
