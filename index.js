@@ -1,4 +1,8 @@
 /**
+Based of below code
+but modified to suit my style
+**/
+/**
  * Minimal Dynamic HTTP Server
  * @author Amit Gupta
  * @description Minimal HTTP server written in Node.js to serve static and dynamic content.
@@ -87,24 +91,13 @@ server.serveStaticContent = (pathname, response) => {
  */
 
 /**
- * Object to hold allowed dynamic paths. Use the setAllowedPaths() public method to set the dynamic paths and the corresponding handlers.
- * {string}path/{function}handler
- * Example:
- * allowedPaths = {
- *                 '/api/somepath': somehandler,
- *                 '/api/anotherpath': anotherhandler
- *               }
- */
-let allowedPaths = {};
-
-/**
  * If incoming path is one of the allowed dynamic paths then return the path
  * else return false
  * @param {string} path
  */
 server.getAllowedDynamicPath = path => {
-  for (const key in allowedPaths) {
-    if (allowedPaths.hasOwnProperty(key)) {
+  for (const key in server.router) {
+    if (server.router.hasOwnProperty(key)) {
       if (path === key) {
         return path;
       }
@@ -144,7 +137,7 @@ server.serveDynamicContent = (request, response) => {
     buffer = Buffer.concat(buffer);
 
     // Prepare the request data object to pass to the handler function
-    const responseData = {
+    const request = {
       method,
       pathname,
       query,
@@ -152,14 +145,14 @@ server.serveDynamicContent = (request, response) => {
     };
 
     // Retrieve the handler for the path
-    const handler = allowedPaths[pathname];
+    const handler = server.router[pathname];
     /**
      * Call the handler for the path
      * @param {Object} responseData
      * @param {function} callback function definition
      *
      */
-    handler(responseData, (statusCode = 200, data = {}) => {
+    handler( request , (statusCode = 200, data = {}) => {
       response.writeHead(statusCode);
       response.end(data);
     });
@@ -170,27 +163,19 @@ server.serveDynamicContent = (request, response) => {
  *
  */
 const httpServer = http.createServer((request, response) => {
-  const pathname = url.parse(request.url, false).pathname;
+  let pathname = url.parse(request.url, false).pathname;
   const dynamicPath = server.getAllowedDynamicPath(pathname);
   if (dynamicPath) {
     server.serveDynamicContent(request, response);
+    console.log( " Dynamic " + pathname )
   } else {
+    pathname == "/" ? pathname = "/index.html" : true
     server.serveStaticContent(pathname, response);
+    console.log( " Static " + pathname )
   }
 });
 
-/**
- *
- * PUBLIC METHODS
- *
- */
-/**
- * Set allowed paths
- * @param {Object} paths - Object containing all the allowed paths
- */
-server.setAllowedPaths = paths => {
-  allowedPaths = paths;
-};
+server.router = {}
 
 /**
  * Main method to start the server
