@@ -44,9 +44,9 @@ This is a simple application written in Node.js without using any frameworks to 
    ```
    server.init(); // This will start the server on port 3000
    ```
-   or, explictly specify the port and hostname for the server
+   or, explictly specify the port
    ```
-   server.init(3500, 'localhost'); //This will start the server on port 3500
+   server.init(3500); //This will start the server on port 3500
    ```
 
 ## Static Content
