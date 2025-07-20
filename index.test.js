@@ -2,7 +2,7 @@ const assert = require('assert').strict;
 const server = require('./index');
 
 // Should return appropriate content type
-(function() {
+(function () {
   try {
     let contentType = server.getContentType('/public/index.html');
     assert.strictEqual(contentType, 'text/html');
@@ -15,7 +15,7 @@ const server = require('./index');
 })();
 
 // Should successfully serve static content
-(function() {
+(function () {
   try {
     let _headerType, _headerValue, _data, _statusCode;
     let response = {
@@ -44,7 +44,7 @@ const server = require('./index');
 })();
 
 // Should handle 404 situation
-(function() {
+(function () {
   try {
     let _headerType, _headerValue, _data, _statusCode;
     let response = {
@@ -74,7 +74,7 @@ const server = require('./index');
 })();
 
 // Should get the allowed dynamic path, or return false if a dynamic path does not exists
-(function() {
+(function () {
   try {
     server.setAllowedPaths({
       '/api/abc': null,
@@ -92,7 +92,7 @@ const server = require('./index');
 })();
 
 // Should successfully server dynamic content
-(function() {
+(function () {
   try {
     let _data, _statusCode, _responseData;
     let response = {

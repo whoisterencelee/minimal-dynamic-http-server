@@ -215,11 +215,11 @@ const httpServer = http.createServer((request, response) => {
  * @param {integer} port - default value 3000
  *
  */
-server.init = (port = 3000 ) => {
+server.init = (port = 3000) => {
   httpServer.listen(port, () => {
-    console.log(`Server is listening at ${port}`);
+    console.log(`Server is listening on port ${port}`);
   });
-};
+}
 
 // Export module
 module.exports = server;
